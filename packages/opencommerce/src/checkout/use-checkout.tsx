@@ -30,7 +30,7 @@ export const handler: SWRHook<GetCheckoutHook> = {
 
       const { addressFields } = useCheckoutContext()
 
-      const { shippingMethod, ...restAddressFields } =
+      const { shippingMethodId, ...restAddressFields } =
         addressFields as AddressFields
 
       const hasEnteredAddress = Object.values(restAddressFields).some(
@@ -44,10 +44,10 @@ export const handler: SWRHook<GetCheckoutHook> = {
             hasPayment: true,
             hasShipping: hasEnteredAddress,
             hasShippingMethods,
-            hasSelectedShippingMethod: !!shippingMethod?.id,
+            hasSelectedShippingMethod: !!shippingMethodId,
           },
         }),
-        [hasEnteredAddress, hasShippingMethods, shippingMethod]
+        [hasEnteredAddress, hasShippingMethods, shippingMethodId]
       )
 
       return useMemo(
