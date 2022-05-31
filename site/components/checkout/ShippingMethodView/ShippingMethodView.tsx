@@ -3,13 +3,8 @@ import useUpdateUpdateAddress from '@framework/customer/address/use-update-item'
 import SidebarLayout from '@components/common/SidebarLayout'
 import { useUI } from '@components/ui/context'
 import { Button } from '@components/ui'
+import useCheckout from '@framework/checkout/use-checkout'
 import { useCheckoutContext } from '../context'
-
-type FulfillmentGroup = {
-  type: string
-  _id: string
-  availableFulfillmentOptions: FulfillmentOption[] | null
-}
 
 type FulfillmentOption = {
   fulfillmentMethod?: {
@@ -28,9 +23,7 @@ const ShippingMethod = () => {
   const { addressFields } = useCheckoutContext()
 
   const updateShippingMethod = useUpdateUpdateAddress()
-  const shippingGroup = cart?.checkout?.fulfillmentGroups.find(
-    (group: FulfillmentGroup) => group?.type === 'shipping'
-  )
+  const { data: checkoutData } = useCheckout()
 
   const handleSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -44,7 +37,7 @@ const ShippingMethod = () => {
     setSidebarView('CHECKOUT_VIEW')
   }
 
-  return shippingGroup ? (
+  return checkoutData.shippingGroup ? (
     <form className="h-full" onSubmit={handleSubmit}>
       <SidebarLayout handleBack={() => setSidebarView('CHECKOUT_VIEW')}>
         <div className="px-4 sm:px-6 flex-1">
@@ -52,7 +45,7 @@ const ShippingMethod = () => {
             Shipping Methods
           </h2>
           <div>
-            {shippingGroup.availableFulfillmentOptions?.map(
+            {checkoutData.shippingGroup.availableFulfillmentOptions?.map(
               (option: FulfillmentOption) => (
                 <div
                   className="flex flex-row my-3 items-center justify-between"
@@ -65,7 +58,7 @@ const ShippingMethod = () => {
                       type="radio"
                       value={option?.fulfillmentMethod?._id}
                       defaultChecked={
-                        shippingGroup.selectedFulfillmentOption
+                        checkoutData.shippingGroup.selectedFulfillmentOption
                           ?.fulfillmentMethod?._id ===
                         option?.fulfillmentMethod?._id
                       }
