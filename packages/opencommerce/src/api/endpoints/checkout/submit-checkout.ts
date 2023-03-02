@@ -5,7 +5,6 @@ import getCartCookie from '../../utils/get-cart-cookie'
 import type { CheckoutEndpoint } from '.'
 
 const submitCheckout: CheckoutEndpoint['handlers']['submitCheckout'] = async ({
-  res,
   body: { item, cartId },
   config: { fetch, shopId, anonymousCartTokenCookie, cartCookie },
   req: { cookies },
@@ -14,7 +13,7 @@ const submitCheckout: CheckoutEndpoint['handlers']['submitCheckout'] = async ({
     variables: {
       input: {
         cartId,
-        cartToken: cookies[anonymousCartTokenCookie],
+        cartToken: cookies.get(anonymousCartTokenCookie)?.value,
         email: 'opencommerce@test.com',
       },
     },
@@ -54,12 +53,11 @@ const submitCheckout: CheckoutEndpoint['handlers']['submitCheckout'] = async ({
     },
   })
 
-  res.setHeader('Set-Cookie', [
-    getCartCookie(cartCookie),
-    getCartCookie(anonymousCartTokenCookie),
-  ])
 
-  res.status(200).json({ data: null, errors: [] })
+  return { data: null, errors: [], headers: {
+    'Set-Cookie': [getCartCookie(cartCookie),
+      getCartCookie(anonymousCartTokenCookie),]
+  } }
 }
 
 export default submitCheckout

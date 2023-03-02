@@ -2,17 +2,16 @@ import selectFulfillmentOptions from '../../../mutations/select-fulfillment-opti
 import type { CustomerAddressEndpoint } from '.'
 
 const updateItem: CustomerAddressEndpoint['handlers']['updateItem'] = async ({
-  res,
   body: { item, cartId },
   config: { fetch, anonymousCartTokenCookie },
   req: { cookies },
 }) => {
   // Return an error if no cart is present
   if (!cartId) {
-    return res.status(400).json({
+    return {
       data: null,
       errors: [{ message: 'Cookie not found' }],
-    })
+    }
   }
 
   if (item.shippingMethodId) {
@@ -20,7 +19,7 @@ const updateItem: CustomerAddressEndpoint['handlers']['updateItem'] = async ({
       variables: {
         input: {
           cartId,
-          cartToken: cookies[anonymousCartTokenCookie],
+          cartToken: cookies.get(anonymousCartTokenCookie)?.value,
           fulfillmentGroupId: item.fulfillmentGroupId,
           fulfillmentMethodId: item.shippingMethodId,
         },
@@ -28,7 +27,7 @@ const updateItem: CustomerAddressEndpoint['handlers']['updateItem'] = async ({
     })
   }
 
-  return res.status(200).json({ data: null, errors: [] })
+  return { data: null, errors: [] }
 }
 
 export default updateItem

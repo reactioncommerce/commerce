@@ -5,7 +5,12 @@ import {
 } from '@vercel/commerce/api'
 import createFetchGraphqlApi from './utils/fetch-grapql-api'
 
-import * as operations from './operations'
+import getAllPages from './operations/get-all-pages'
+import getPage from './operations/get-page'
+import getSiteInfo from './operations/get-site-info'
+import getAllProductPaths from './operations/get-all-product-paths'
+import getAllProducts from './operations/get-all-products'
+import getProduct from './operations/get-product'
 
 const API_URL = process.env.OPENCOMMERCE_STOREFRONT_API_URL
 const SHOP_ID = process.env.OPENCOMMERCE_PRIMARY_SHOP_ID
@@ -32,6 +37,15 @@ const config: OpenCommerceConfig = {
   cartCookieMaxAge: ONE_DAY * 30,
   anonymousCartTokenCookie: 'opencommerce_anonymousCartToken',
   fetch: createFetchGraphqlApi(() => getCommerceApi().getConfig()),
+}
+
+const operations = {
+  getAllPages,
+  getPage,
+  getSiteInfo,
+  getAllProductPaths,
+  getAllProducts,
+  getProduct,
 }
 
 export const provider = { config, operations }

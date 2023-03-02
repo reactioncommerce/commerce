@@ -6,16 +6,15 @@ import createCartMutation from '../../mutations/create-cart'
 import type { CartEndpoint } from '.'
 
 const addItem: CartEndpoint['handlers']['addItem'] = async ({
-  res,
   body: { cartId, item },
   config,
   req: { cookies },
 }) => {
   if (!item) {
-    return res.status(400).json({
+    return {
       data: null,
       errors: [{ message: 'Missing item' }],
-    })
+    }
   }
   if (!item.quantity) item.quantity = 1
 
@@ -42,20 +41,23 @@ const addItem: CartEndpoint['handlers']['addItem'] = async ({
     const {
       data: { createCart },
     } = await config.fetch(createCartMutation, { variables })
-    res.setHeader('Set-Cookie', [
-      getCartCookie(
-        config.cartCookie,
-        createCart.cart._id,
-        config.cartCookieMaxAge
-      ),
-      getCartCookie(
-        config.anonymousCartTokenCookie,
-        createCart.token,
-        config.cartCookieMaxAge
-      ),
-    ])
-
-    return res.status(200).json({ data: normalizeCart(createCart.cart) })
+    return {
+      data: normalizeCart(createCart.cart),
+      headers: {
+        'Set-Cookie': [
+          getCartCookie(
+            config.cartCookie,
+            createCart.cart._id,
+            config.cartCookieMaxAge
+          ),
+          getCartCookie(
+            config.anonymousCartTokenCookie,
+            createCart.token,
+            config.cartCookieMaxAge
+          ),
+        ],
+      },
+    }
   }
 
   const {
@@ -65,12 +67,12 @@ const addItem: CartEndpoint['handlers']['addItem'] = async ({
       input: {
         items: variables.input.items,
         cartId,
-        cartToken: cookies[config.anonymousCartTokenCookie],
+        cartToken: cookies.get(config.anonymousCartTokenCookie)?.value,
       },
     },
   })
 
-  return res.status(200).json({ data: normalizeCart(addCartItems.cart) })
+  return { data: normalizeCart(addCartItems.cart) }
 }
 
 export default addItem

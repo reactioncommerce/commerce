@@ -7,7 +7,7 @@ import type {
 import {
   OCCategory,
   Category,
-  Vendor,
+  Brand,
   OCVendor,
   Navigation,
 } from '../types/site'
@@ -53,7 +53,7 @@ export function normalizeProduct(
     name: title ?? '',
     description: description ?? '',
     slug: slug?.replace(/^\/+|\/+$/g, '') ?? '',
-    path: slug ?? '',
+    path: `/${slug}` ?? '/',
     sku: sku ?? '',
     images: media?.length
       ? normalizeProductImages(<ImageInfo[]>media, title ?? '')
@@ -226,13 +226,12 @@ export function normalizeCategory(category: OCCategory): Category {
   }
 }
 
-export function normalizeVendors({ name }: OCVendor): Vendor {
+export function normalizeVendors({ name }: OCVendor): Brand {
   return {
-    node: {
-      entityId: name ?? '',
-      name: name ?? '',
-      path: `brands/${name}`,
-    },
+    id: name ?? '',
+    name: name ?? '',
+    path: `/${name}`,
+    slug: `/brands/${name}`,
   }
 }
 

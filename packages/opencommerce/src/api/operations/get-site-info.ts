@@ -9,7 +9,7 @@ import {
   GetAllProductVendorsQueryVariables,
 } from '../../../schema'
 import getTagsQuery from '../queries/get-tags-query'
-import { GetSiteInfoOperation, OCCategory, SiteTypes } from '../../types/site'
+import { GetSiteInfoOperation, OCCategory } from '../../types/site'
 import {
   normalizeCategory,
   normalizeNavigation,

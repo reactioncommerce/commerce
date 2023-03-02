@@ -6,7 +6,6 @@ import getShopCurrencyQuery from '../../queries/get-shop-currency-query'
 
 const getProducts: ProductsEndpoint['handlers']['getProducts'] = async ({
   body: { brandId, search, sort, categoryId },
-  res,
   config,
   commerce,
 }) => {
@@ -45,12 +44,12 @@ const getProducts: ProductsEndpoint['handlers']['getProducts'] = async ({
     config,
   })
 
-  res.status(200).json({
+  return {
     data: {
       products,
       found: !!products.length,
     },
-  })
+  }
 }
 
 export default getProducts
