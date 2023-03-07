@@ -11,19 +11,23 @@ import getSiteInfo from './operations/get-site-info'
 import getAllProductPaths from './operations/get-all-product-paths'
 import getAllProducts from './operations/get-all-products'
 import getProduct from './operations/get-product'
+import {
+  OPENCOMMERCE_ANONYMOUS_CART_TOKEN_COOKIE,
+  OPENCOMMERCE_CART_TOKEN,
+  API_URL,
+} from '../const'
 
-const API_URL = process.env.OPENCOMMERCE_STOREFRONT_API_URL
+export interface OpenCommerceConfig extends CommerceAPIConfig {
+  shopId: string
+  anonymousCartTokenCookie: string
+}
+
 const SHOP_ID = process.env.OPENCOMMERCE_PRIMARY_SHOP_ID
 
 if (!API_URL) {
   throw new Error(
     `The environment variable OPENCOMMERCE_STOREFRONT_API_URL is missing and it's required to access your store`
   )
-}
-
-export interface OpenCommerceConfig extends CommerceAPIConfig {
-  shopId: string
-  anonymousCartTokenCookie: string
 }
 
 const ONE_DAY = 60 * 60 * 24
@@ -33,9 +37,9 @@ const config: OpenCommerceConfig = {
   apiToken: '',
   shopId: SHOP_ID ?? '',
   customerCookie: 'opencommerce_customerToken',
-  cartCookie: 'opencommerce_cartId',
+  cartCookie: OPENCOMMERCE_CART_TOKEN,
   cartCookieMaxAge: ONE_DAY * 30,
-  anonymousCartTokenCookie: 'opencommerce_anonymousCartToken',
+  anonymousCartTokenCookie: OPENCOMMERCE_ANONYMOUS_CART_TOKEN_COOKIE,
   fetch: createFetchGraphqlApi(() => getCommerceApi().getConfig()),
 }
 

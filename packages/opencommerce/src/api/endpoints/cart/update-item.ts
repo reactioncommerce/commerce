@@ -10,7 +10,7 @@ const updateItem: CartEndpoint['handlers']['updateItem'] = async ({
 }) => {
   if (!cartId || !itemId || !item) {
     return {
-      data: null,
+      data: undefined,
       errors: [{ message: 'Invalid request' }],
     }
   }

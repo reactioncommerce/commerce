@@ -1,8 +1,10 @@
 import { LineItem } from '../../../types/cart'
 import placeOrder from '../../mutations/place-order'
 import setEmailOnAnonymousCart from '../../mutations/set-email-on-anonymous-cart'
+import getAnonymousCartQuery from '../../queries/get-anonymous-cart'
 import getCartCookie from '../../utils/get-cart-cookie'
 import type { CheckoutEndpoint } from '.'
+import { normalizeCheckout, normalizeCart } from '../../../utils/normalize'
 
 const submitCheckout: CheckoutEndpoint['handlers']['submitCheckout'] = async ({
   body: { item, cartId },
@@ -19,23 +21,35 @@ const submitCheckout: CheckoutEndpoint['handlers']['submitCheckout'] = async ({
     },
   })
 
+  const {
+    data: { cart: rawAnonymousCart },
+  } = await fetch(getAnonymousCartQuery, {
+    variables: {
+      cartId,
+      cartToken: cookies.get(anonymousCartTokenCookie)?.value,
+    },
+  })
+
+  const checkout = normalizeCheckout(rawAnonymousCart.checkout)
+  const cart = normalizeCart(rawAnonymousCart)
+
   const { data } = await fetch(placeOrder, {
     variables: {
       input: {
         payments: {
           data: { fullName: 'Open Commerce Demo Site' },
-          amount: item.checkout.cart.checkout.summary.total.amount,
+          amount: checkout.summary.total.amount,
           method: 'iou_example',
         },
         order: {
           cartId,
-          currencyCode: item.checkout.cart.currency.code,
+          currencyCode: cart.currency.code,
           email: 'opencommerce@test.com',
           shopId,
           fulfillmentGroups: {
             shopId,
-            data: item.checkout.cart.checkout.fulfillmentGroups[0].data,
-            items: item.checkout.cart.lineItems.map((item: LineItem) => ({
+            data: checkout.fulfillmentGroups[0].data,
+            items: cart.lineItems.map((item: LineItem) => ({
               price: item.variant.price,
               quantity: item.quantity,
               productConfiguration: {
@@ -43,21 +57,26 @@ const submitCheckout: CheckoutEndpoint['handlers']['submitCheckout'] = async ({
                 productVariantId: item.variantId,
               },
             })),
-            type: item.checkout.cart.checkout.fulfillmentGroups[0].type,
+            type: checkout.fulfillmentGroups[0].type,
             selectedFulfillmentMethodId:
-              item.checkout.cart.checkout.fulfillmentGroups[0]
-                .selectedFulfillmentOption.fulfillmentMethod._id,
+              checkout.fulfillmentGroups[0].selectedFulfillmentOption
+                ?.fulfillmentMethod?._id,
           },
         },
       },
     },
   })
 
-
-  return { data: null, errors: [], headers: {
-    'Set-Cookie': [getCartCookie(cartCookie),
-      getCartCookie(anonymousCartTokenCookie),]
-  } }
+  return {
+    data: null,
+    errors: [],
+    headers: {
+      'Set-Cookie': [
+        getCartCookie(cartCookie),
+        getCartCookie(anonymousCartTokenCookie),
+      ],
+    },
+  }
 }
 
 export default submitCheckout

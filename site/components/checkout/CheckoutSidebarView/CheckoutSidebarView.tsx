@@ -21,10 +21,9 @@ const CheckoutSidebarView: FC = () => {
   const { data: cartData, mutate: refreshCart } = useCart()
   const { data: checkoutData } = useCheckout()
   const onCheckout = useSubmitCheckout()
-
+  console.log({ checkoutData })
   const { clearCheckoutFields, cardFields, addressFields } =
     useCheckoutContext()
-
   async function handleSubmit(event: React.ChangeEvent<HTMLFormElement>) {
     try {
       setLoadingSubmit(true)
@@ -32,7 +31,6 @@ const CheckoutSidebarView: FC = () => {
       await onCheckout({
         card: cardFields,
         address: addressFields,
-        checkout: { cart: cartData },
       })
       clearCheckoutFields()
       setLoadingSubmit(false)
@@ -111,7 +109,7 @@ const CheckoutSidebarView: FC = () => {
           {checkoutData?.hasSelectedShippingMethod ? (
             <li className="flex justify-between py-1">
               <span>Shipping</span>
-              <span>{checkoutData?.totalAmount}</span>
+              <span>{checkoutData?.totalDisplayAmount}</span>
             </li>
           ) : (
             <li className="flex justify-between py-1">

@@ -1,7 +1,8 @@
-import { normalizeCart } from '../../../utils/normalize'
+import { normalizeCart, normalizeProduct } from '../../../utils/normalize'
 import getCartCookie from '../../utils/get-cart-cookie'
 import addCartItemsMutation from '../../mutations/add-cart-item'
 import createCartMutation from '../../mutations/create-cart'
+import getProductQuery from '../../queries/get-catalog-product-item-query'
 
 import type { CartEndpoint } from '.'
 
@@ -16,6 +17,26 @@ const addItem: CartEndpoint['handlers']['addItem'] = async ({
       errors: [{ message: 'Missing item' }],
     }
   }
+
+  const {
+    data: { catalogItemProduct },
+  } = await config.fetch(getProductQuery, {
+    variables: { slug: item.productId! },
+  })
+
+  const product = normalizeProduct(catalogItemProduct)
+
+  const selectedVariant = product.variants.find(
+    ({ id }) => id === item.variantId
+  )
+
+  if (!selectedVariant) {
+    return {
+      data: null,
+      errors: [{ message: 'Invalid product or variant' }],
+    }
+  }
+
   if (!item.quantity) item.quantity = 1
 
   const variables = {
@@ -24,13 +45,13 @@ const addItem: CartEndpoint['handlers']['addItem'] = async ({
       items: [
         {
           productConfiguration: {
-            productId: item.productId,
+            productId: catalogItemProduct.product.productId,
             productVariantId: item.variantId,
           },
           quantity: item.quantity,
           price: {
-            amount: item.variant?.price,
-            currencyCode: item.currencyCode,
+            amount: selectedVariant?.price?.value || 0,
+            currencyCode: product?.price.currencyCode,
           },
         },
       ],
