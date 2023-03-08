@@ -17,6 +17,7 @@ import { CheckoutProvider } from '@components/checkout/context'
 import { MenuSidebarView } from '@components/common/UserNav'
 import type { Page } from '@commerce/types/page'
 import type { Category } from '@commerce/types/site'
+import type { Navigation } from '@framework/types/site'
 import type { Link as LinkProps } from '../UserNav/MenuSidebarView'
 
 const Loading = () => (
@@ -53,7 +54,7 @@ interface Props {
   pageProps: {
     pages?: Page[]
     categories: Category[]
-    navigation: any
+    navigation: Navigation[]
   }
   children?: React.ReactNode
 }
