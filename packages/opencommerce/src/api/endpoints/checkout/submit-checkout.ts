@@ -5,12 +5,24 @@ import getAnonymousCartQuery from '../../queries/get-anonymous-cart'
 import getCartCookie from '../../utils/get-cart-cookie'
 import type { CheckoutEndpoint } from '.'
 import { normalizeCheckout, normalizeCart } from '../../../utils/normalize'
+import { PrimaryShopQuery } from '../../../../schema'
+import getPrimaryShopQuery from '../../queries/get-primary-shop-query'
 
 const submitCheckout: CheckoutEndpoint['handlers']['submitCheckout'] = async ({
-  body: { item, cartId },
-  config: { fetch, shopId, anonymousCartTokenCookie, cartCookie },
+  body: { cartId },
+  config: { fetch, anonymousCartTokenCookie, cartCookie },
   req: { cookies },
 }) => {
+  const {
+    data: { primaryShop },
+  } = await fetch<PrimaryShopQuery>(getPrimaryShopQuery)
+
+  if (!primaryShop?._id) {
+    return {
+      data: null,
+    }
+  }
+
   await fetch(setEmailOnAnonymousCart, {
     variables: {
       input: {
@@ -45,9 +57,9 @@ const submitCheckout: CheckoutEndpoint['handlers']['submitCheckout'] = async ({
           cartId,
           currencyCode: cart.currency.code,
           email: 'opencommerce@test.com',
-          shopId,
+          shopId: primaryShop._id,
           fulfillmentGroups: {
-            shopId,
+            shopId: primaryShop._id,
             data: checkout.fulfillmentGroups[0].data,
             items: cart.lineItems.map((item: LineItem) => ({
               price: item.variant.price,

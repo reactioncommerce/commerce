@@ -3,8 +3,10 @@ import getCartCookie from '../../utils/get-cart-cookie'
 import addCartItemsMutation from '../../mutations/add-cart-item'
 import createCartMutation from '../../mutations/create-cart'
 import getProductQuery from '../../queries/get-catalog-product-item-query'
+import getPrimaryShopQuery from '../../queries/get-primary-shop-query'
 
 import type { CartEndpoint } from '.'
+import { PrimaryShopQuery } from '../../../../schema'
 
 const addItem: CartEndpoint['handlers']['addItem'] = async ({
   body: { cartId, item },
@@ -15,6 +17,16 @@ const addItem: CartEndpoint['handlers']['addItem'] = async ({
     return {
       data: null,
       errors: [{ message: 'Missing item' }],
+    }
+  }
+
+  const {
+    data: { primaryShop },
+  } = await config.fetch<PrimaryShopQuery>(getPrimaryShopQuery)
+
+  if (!primaryShop?._id) {
+    return {
+      data: null,
     }
   }
 
@@ -41,7 +53,7 @@ const addItem: CartEndpoint['handlers']['addItem'] = async ({
 
   const variables = {
     input: {
-      shopId: config.shopId,
+      shopId: primaryShop._id,
       items: [
         {
           productConfiguration: {

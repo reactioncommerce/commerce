@@ -18,11 +18,8 @@ import {
 } from '../const'
 
 export interface OpenCommerceConfig extends CommerceAPIConfig {
-  shopId: string
   anonymousCartTokenCookie: string
 }
-
-const SHOP_ID = process.env.OPENCOMMERCE_PRIMARY_SHOP_ID
 
 if (!API_URL) {
   throw new Error(
@@ -35,7 +32,6 @@ const ONE_DAY = 60 * 60 * 24
 const config: OpenCommerceConfig = {
   commerceUrl: API_URL,
   apiToken: '',
-  shopId: SHOP_ID ?? '',
   customerCookie: 'opencommerce_customerToken',
   cartCookie: OPENCOMMERCE_CART_TOKEN,
   cartCookieMaxAge: ONE_DAY * 30,

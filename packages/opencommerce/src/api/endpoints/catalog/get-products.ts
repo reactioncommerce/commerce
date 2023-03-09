@@ -1,8 +1,11 @@
 import type { ProductsEndpoint } from './products'
 import getSearchVariables from '../../utils/get-search-variables'
 import getSortVariables from '../../utils/get-sort-variables'
-import { CatalogItemsQueryVariables } from '../../../../schema'
-import getShopCurrencyQuery from '../../queries/get-shop-currency-query'
+import {
+  CatalogItemsQueryVariables,
+  PrimaryShopQuery,
+} from '../../../../schema'
+import getPrimaryShopQuery from '../../queries/get-primary-shop-query'
 
 const getProducts: ProductsEndpoint['handlers']['getProducts'] = async ({
   body: { brandId, search, sort, categoryId },
@@ -14,20 +17,20 @@ const getProducts: ProductsEndpoint['handlers']['getProducts'] = async ({
     sortParams = null
   }
 
-  let currency: string | null = null
+  const {
+    data: { primaryShop },
+  } = await config.fetch<PrimaryShopQuery>(getPrimaryShopQuery)
 
-  if (sortParams?.sortBy === 'minPrice') {
-    const {
+  if (!primaryShop?._id) {
+    return {
       data: {
-        shop: {
-          currency: { code },
-        },
+        products: [],
+        found: false
       },
-    } = await config.fetch(getShopCurrencyQuery, {
-      variables: { id: config.shopId },
-    })
-    currency = code
+    }
   }
+
+  let currency: string | null = primaryShop.currency.code
 
   const { products } = await commerce.getAllProducts({
     variables: {
