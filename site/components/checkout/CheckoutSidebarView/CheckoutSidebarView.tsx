@@ -21,7 +21,7 @@ const CheckoutSidebarView: FC = () => {
   const { data: cartData, mutate: refreshCart } = useCart()
   const { data: checkoutData } = useCheckout()
   const onCheckout = useSubmitCheckout()
-  console.log({ checkoutData })
+
   const { clearCheckoutFields, cardFields, addressFields } =
     useCheckoutContext()
   async function handleSubmit(event: React.ChangeEvent<HTMLFormElement>) {
